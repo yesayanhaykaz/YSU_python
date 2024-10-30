@@ -1,0 +1,79 @@
+import json
+
+def read_netlist(filepath):
+    """Reads a netlist file and parses its content into a structured dictionary."""
+    parsed_data = {"elements": []}
+
+    with open(filepath, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if is_comment_or_blank(line):
+                continue
+            
+            element = parse_line(line)
+            if element:
+                parsed_data["elements"].append(element)
+    
+    return parsed_data
+
+
+def is_comment_or_blank(line):
+    """Checks if a line is a comment or blank."""
+    return line.startswith("*") or not line
+
+
+def parse_line(line):
+    """Parses a line from the netlist and returns a structured dictionary for the component."""
+    tokens = line.split()
+    element_type = tokens[0][0]
+
+    if element_type == "V":
+        return parse_voltage_source(tokens)
+    elif element_type == "R":
+        return parse_resistor(tokens)
+    elif element_type == "C":
+        return parse_capacitor(tokens)
+    # Additional component types can be added here
+    else:
+        return None
+
+
+def parse_voltage_source(tokens):
+    """Parses a voltage source line and returns a dictionary with its properties."""
+    return {
+        "id": tokens[0],
+        "category": "voltage_source",
+        "connections": {"node_a": tokens[1], "node_b": tokens[2]},
+        "properties": {"mode": tokens[3], "magnitude": tokens[4]}
+    }
+
+
+def parse_resistor(tokens):
+    """Parses a resistor line and returns a dictionary with its properties."""
+    return {
+        "id": tokens[0],
+        "category": "resistor",
+        "connections": {"node_a": tokens[1], "node_b": tokens[2]},
+        "properties": {"resistance": tokens[3]}
+    }
+
+
+def parse_capacitor(tokens):
+    """Parses a capacitor line and returns a dictionary with its properties."""
+    return {
+        "id": tokens[0],
+        "category": "capacitor",
+        "connections": {"node_a": tokens[1], "node_b": tokens[2]},
+        "properties": {"capacitance": tokens[3]}
+    }
+
+
+def netlist_as_json(filepath):
+    """Converts the parsed netlist into a JSON string."""
+    parsed_data = read_netlist(filepath)
+    return json.dumps(parsed_data, indent=4)
+
+
+# Example usage
+file_path = "deck.sp"
+print(netlist_as_json(file_path))
