@@ -1,0 +1,52 @@
+import json
+
+def parse_spice_netlist(filename):
+    netlist_dict = {
+        "components": []
+    }
+
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith("*") or not line:
+                continue
+            
+            tokens = line.split()
+            component = {}
+            
+            if tokens[0].startswith("V"):
+                component['type'] = 'voltage_source'
+                component['name'] = tokens[0]
+                component['node1'] = tokens[1]
+                component['node2'] = tokens[2]
+                component['value_type'] = tokens[3]
+                component['value'] = tokens[4]
+            elif tokens[0].startswith("R"):
+                component['type'] = 'resistor'
+                component['name'] = tokens[0]
+                component['node1'] = tokens[1]
+                component['node2'] = tokens[2]
+                component['value'] = tokens[3]
+            elif tokens[0].startswith("C"):
+                component['type'] = 'capacitor'
+                component['name'] = tokens[0]
+                component['node1'] = tokens[1]
+                component['node2'] = tokens[2]
+                component['value'] = tokens[3]
+
+            if component:
+                netlist_dict['components'].append(component)
+    
+    return netlist_dict
+
+
+def netlist_to_json(filename):
+    netlist_dict = parse_spice_netlist(filename)
+    return json.dumps(netlist_dict, indent=4)
+
+
+filename = "deck.sp"
+netlist_dict = parse_spice_netlist(filename)
+print(netlist_to_json(filename))
