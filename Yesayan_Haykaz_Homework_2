@@ -1,0 +1,156 @@
+class Animal:
+    def __init__(self, name, species, age, diet):
+        self.name = name
+        self.species = species
+        self.age = age
+        self.diet = diet
+        self.is_fed = False
+
+    def feed(self):
+        self.is_fed = True
+        print(f"{self.name} the {self.species} has been fed.")
+
+    def __str__(self):
+        fed_status = "fed" if self.is_fed else "hungry"
+        return f"{self.name} ({self.species}, {self.age} years old) is {fed_status}."
+
+
+class Enclosure:
+    def __init__(self, name, size):
+        self.name = name
+        self.size = size  # Size in square meters
+        self.animals = []
+        self.cleanliness = 100  # Starts clean (percentage)
+
+    def add_animal(self, animal):
+        if self.cleanliness > 50:
+            self.animals.append(animal)
+        else:
+            print(f"Cannot add {animal.name}. {self.name} needs cleaning first!")
+
+    def clean_enclosure(self):
+        self.cleanliness = 100
+        print(f"The enclosure {self.name} has been cleaned.")
+
+    def feed_animals(self):
+        for animal in self.animals:
+            animal.feed()
+
+    def __str__(self):
+        return (f"Enclosure {self.name}: {len(self.animals)} animal(s), "
+                f"cleanliness {self.cleanliness}%.")
+
+
+class Zookeeper:
+    def __init__(self, name, experience):
+        self.name = name
+        self.experience = experience  # In years
+        self.schedule = {}
+
+    def assign_task(self, enclosure, task):
+        if enclosure.name not in self.schedule:
+            self.schedule[enclosure.name] = []
+        self.schedule[enclosure.name].append(task)
+
+    def perform_tasks(self):
+        for enclosure_name, tasks in self.schedule.items():
+            print(f"{self.name} is working on {enclosure_name}.")
+            for task in tasks:
+                task()
+            self.schedule[enclosure_name] = []
+
+    def __str__(self):
+        return f"Zookeeper {self.name} with {self.experience} years of experience."
+
+
+class VisitorGroup:
+    def __init__(self, group_name, num_visitors):
+        self.group_name = group_name
+        self.num_visitors = num_visitors
+
+    def visit_enclosure(self, enclosure):
+        print(f"{self.group_name} (Group of {self.num_visitors}) is visiting {enclosure.name}.")
+        if len(enclosure.animals) == 0:
+            print(f"{enclosure.name} is empty.")
+        else:
+            for animal in enclosure.animals:
+                print(f"The group sees {animal.name}, a {animal.species}.")
+
+    def __str__(self):
+        return f"Visitor Group {self.group_name}, {self.num_visitors} members."
+
+
+class Zoo:
+    def __init__(self, name):
+        self.name = name
+        self.enclosures = []
+        self.zookeepers = []
+
+    def add_enclosure(self, enclosure):
+        self.enclosures.append(enclosure)
+
+    def add_zookeeper(self, zookeeper):
+        self.zookeepers.append(zookeeper)
+
+    def daily_report(self):
+        print(f"Zoo: {self.name} - Daily Report")
+        for enclosure in self.enclosures:
+            print(enclosure)
+            for animal in enclosure.animals:
+                print(f"  - {animal}")
+        for zookeeper in self.zookeepers:
+            print(f"Zookeeper: {zookeeper.name}")
+
+    def __str__(self):
+        return f"Zoo {self.name}: {len(self.enclosures)} enclosures, {len(self.zookeepers)} zookeepers."
+
+
+class TicketSystem:
+    def __init__(self):
+        self.revenue = 0
+
+    def sell_ticket(self, visitor_group, price_per_person):
+        total_price = visitor_group.num_visitors * price_per_person
+        self.revenue += total_price
+        print(f"Sold ticket to {visitor_group.group_name} for ${total_price}.")
+
+    def show_revenue(self):
+        print(f"Total revenue: ${self.revenue}")
+
+
+if __name__ == "__main__":
+
+    elephant = Animal("Dumbo", "Elephant", 10, "Herbivore")
+    tiger = Animal("Shera", "Tiger", 5, "Carnivore")
+    monkey = Animal("George", "Monkey", 3, "Omnivore")
+
+    savannah = Enclosure("Savannah", 500)
+    jungle = Enclosure("Jungle", 400)
+    savannah.add_animal(elephant)
+    jungle.add_animal(tiger)
+    jungle.add_animal(monkey)
+
+    zookeeper = Zookeeper("John", 12)
+    zookeeper.assign_task(jungle, jungle.feed_animals)
+    zookeeper.assign_task(jungle, jungle.clean_enclosure)
+    zookeeper.assign_task(savannah, savannah.clean_enclosure)
+
+    zookeeper.perform_tasks()
+
+    group_a = VisitorGroup("Family Group A", 4)
+    group_b = VisitorGroup("School Group B", 20)
+
+    group_a.visit_enclosure(savannah)
+    group_b.visit_enclosure(jungle)
+
+    zoo = Zoo("Wildlife Paradise")
+    zoo.add_enclosure(savannah)
+    zoo.add_enclosure(jungle)
+    zoo.add_zookeeper(zookeeper)
+
+    ticket_system = TicketSystem()
+    ticket_system.sell_ticket(group_a, 15)  # $15 per person
+    ticket_system.sell_ticket(group_b, 10)  # $10 per person
+    ticket_system.show_revenue()
+
+    zoo.daily_report()
